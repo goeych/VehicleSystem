@@ -1,5 +1,5 @@
-from django.shortcuts import render,redirect
-from .forms import CreateCustomerForm
+from django.shortcuts import render,redirect,get_object_or_404
+from .forms import CustomerForm
 from generalExpense.models import Customer
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate,login,logout
@@ -54,3 +54,19 @@ def loginPage(request):
 def logoutPage(request):
     logout(request)
     return redirect('login')
+
+def accountSettings(request):
+    customer = get_object_or_404(Customer, user=request.user)
+    
+    print('customer:',customer)
+    print('customer:',customer.name)
+    print('customer:',customer.email)
+    #form = CustomerForm(instance = customer)
+
+    #if request.method == 'POST':
+     #   form = CustomerForm(request.POST,request.FILES,instance=customer)
+      #  if form.is_valid():
+      #      form.save()
+    
+    context={}#'form':form}
+    return render(request,'accounts/account_Settings.html',context)
