@@ -13,6 +13,7 @@
             <p>Customer:{{customers.name}}</p>
             <p>Email: {{customers.email}}</p>
             <p>Phone: {{customers.phone}}</p>
+            <p><a href="{%url 'customer' customers.id %}">Show All</a></p>
         </div>
     </div>
 
@@ -29,43 +30,46 @@
 
     <div class="col-md-4">
         <div class="card card-body">
-            <h5>Vehicle Expenses: {{totalexpense}}</5>
+            <h5>Vehicle Expenses: {{totalexpense|floatformat:2}}</5>
             
-            <h5>Daily Expenses: {{totaldailyexpense}}</5>
+            <h5>Daily Expenses: {{totaldailyexpense|floatformat:2}}</5>
 
         </div>
         <div class="card card-body">
-            <h5>Total Daily Expenses: {{totalspend}}</5>
-
+            <h5>Total Daily Expenses: {{totalspend|floatformat:2}}</5>
             
         </div>
 
-    
-
-
-        
     </div>
     
 </div>
 
-<br>
-<div class="row">
-    <div class="col">
-        <div class="card card-body">
-        
-            <form method=get">
-            
-            <button class="btn btn-primary" type="submit">Search</button>
-            </form>
-            
-        </div>
-    </div>
-</div>
+
+
+
+
+
+
 
 <br>
 
 <div class="row">
+
     <div class="col-md">
+
+        <div class="col">
+                <div class="card card-body">
+                
+                    <form method="get" name="vehicle-filter-form">
+                    {{ vehicleFilter.form }}
+                    <input type="hidden" name="filter_type" value="vehicle">
+                    <button class="btn btn-primary" type="submit">Search Vehicle Expenses</button>
+                    </form>
+                    
+                </div>
+        </div>
+
+
         <h5>Vehicle Expenses Last 5 orders:</h5>
         <div class="card card-body">
             <table class="table table-sm">
@@ -93,6 +97,20 @@
     </div>
 
     <div class="col-md">
+
+    <div class="col">
+        <div class="card card-body">
+        
+            <form method="get" name="daily-filter-form">
+            {{ dailyFilter.form }}
+            <input type="hidden" name="filter_type" value="daily">
+            <button class="btn btn-primary" type="submit">Search Daily Expenses</button>
+            </form>
+            
+        </div>
+    </div>
+    
+    
         <h5>Daily Expenses Last 5 orders:</h5>
         <div class="card card-body">
             <table class="table table-sm">

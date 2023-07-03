@@ -6,7 +6,9 @@ from django.forms import widgets
 
 
 
-from .models import Vehicleexpense,Dailyexpense
+from .models import Vehicleexpense,Dailyexpense,Customer
+
+
 
 class DateInput(forms.DateInput):
     input_type = 'date'

@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from .models import Vehicle,Vehicleexpense,Customer,Dailyexpense
 from .forms import ExpensesForm,DailyexpensesForm
 
+from .filters import VehicleexpenseFilter,DailyexpenseFilter
+
 # Create your views here.
 
 @login_required(login_url='login')
@@ -12,20 +14,24 @@ def dashboard(request):
     vehicleexpenses = Vehicleexpense.objects.all()[:5]
     customers =Customer.objects.all()
 
-
-
-    
     context = {'customers':customers,'vehicleexpenses':vehicleexpenses,
                }
     return render(request,'generalExpense/dashboard.html',context)
 
 @login_required(login_url='login')
-def customer(request,pk):
+
+def customer_stop(request,pk):
 
     customers = Customer.objects.get(id=pk)
     vehicleexpenses = customers.vehicleexpense_set.all()
 
     dailyexpenses = customers.dailyexpense_set.all()
+
+    vehicleFilter = VehicleexpenseFilter(request.GET,queryset = vehicleexpenses )
+    vehicleexpenses = vehicleFilter.qs
+
+    dailyFilter = DailyexpenseFilter(request.GET, queryset = dailyexpenses)
+    dailyexpenses = dailyFilter.qs
 
     #sum the total expenses for individual customer,reference from ChatGPT
     totalexpense = sum(Vehicleexpense.price for Vehicleexpense in vehicleexpenses)
@@ -38,8 +44,46 @@ def customer(request,pk):
     context = {'vehicleexpenses':vehicleexpenses,'customers':customers,
                'totalexpense':totalexpense,'dailyexpenses':dailyexpenses,
                'totaldailyexpense':totaldailyexpense,'totalspend':totalspend,
+               'vehicleFilter':vehicleFilter,'dailyFilter':dailyFilter,
                }
     return render(request,'generalExpense/customer.html',context)
+
+def customer(request, pk):
+    customers = Customer.objects.get(id=pk)
+    vehicleexpenses = customers.vehicleexpense_set.all()
+    dailyexpenses = customers.dailyexpense_set.all()
+
+    filter_type = request.GET.get('filter_type')
+    if filter_type == 'vehicle':
+        vehicleFilter = VehicleexpenseFilter(request.GET, queryset=vehicleexpenses)
+        vehicleexpenses = vehicleFilter.qs
+        totalexpense = sum(Vehicleexpense.price for Vehicleexpense in vehicleexpenses)
+        totaldailyexpense = 0  # Set the total daily expense to 0 as only the vehicle filter is selected
+    elif filter_type == 'daily':
+        dailyFilter = DailyexpenseFilter(request.GET, queryset=dailyexpenses)
+        dailyexpenses = dailyFilter.qs
+        totalexpense = 0  # Set the total expense to 0 as only the daily filter is selected
+        totaldailyexpense = sum(Dailyexpense.price for Dailyexpense in dailyexpenses)
+    else:
+        # No filter selected, apply default behavior
+        totalexpense = sum(Vehicleexpense.price for Vehicleexpense in vehicleexpenses)
+        totaldailyexpense = sum(Dailyexpense.price for Dailyexpense in dailyexpenses)
+
+    totalspend = totalexpense + totaldailyexpense
+
+    context = {
+        'vehicleexpenses': vehicleexpenses,
+        'customers': customers,
+        'totalexpense': totalexpense,
+        'dailyexpenses': dailyexpenses,
+        'totaldailyexpense': totaldailyexpense,
+        'totalspend': totalspend,
+        'vehicleFilter': vehicleFilter if filter_type == 'vehicle' else None,
+        'dailyFilter': dailyFilter if filter_type == 'daily' else None,
+    }
+    return render(request, 'generalExpense/customer.html', context)
+
+
 
 @login_required(login_url='login')
 def addVehicleexpense(request,pk):
@@ -149,3 +193,5 @@ def deleteDailyexpense(request,pk):
     
     context={}
     return render(request,'generalExpense/DeleteDailyexpenses.html',context)
+
+
